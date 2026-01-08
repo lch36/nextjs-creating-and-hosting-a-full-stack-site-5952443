@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export default function CheckoutPage() {
   return (
     <div className="container mx-auto p-8 flex flex-col items-center justify-center h-screen">
