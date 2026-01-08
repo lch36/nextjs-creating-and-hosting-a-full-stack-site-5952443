@@ -1,28 +1,12 @@
-'use client';
+import ShoppingCartList from "./ShoppingCartList";
 
-import { useState} from "react";
-import {products} from "@/app/product-data";
-import Link from "next/link";
+export const dynamic = 'force-dynamic';
 
-export default function CartPage() {
-    const [cartIds] = useState(['123', '345']);
-    const cartProducts = products.filter((p) => cartIds.includes(p.id)!);
+export default async function CartPage() {
+    const response = await fetch(process.env.NEXT_PUBLIC_SITE_URL + '/api/users/1/cart', { cache: 'no-store' });
+    const cartProducts = await response.json();
 
     return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-4xl font-bold mb-8">Shopping Cart</h1>
-
-      <ul className="space-y-4"> {/* List for cart items */}
-        {cartProducts.map(product => (
-          <li key={product.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-300">
-            <Link href={`/products/${product.id}`}>
-              <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-              <p className="text-gray-600">${product.price}</p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-
+      <ShoppingCartList initialCartProducts={cartProducts} />
+    );
 }

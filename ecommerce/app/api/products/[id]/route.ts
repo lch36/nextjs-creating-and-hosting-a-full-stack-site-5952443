@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
-import { products } from "@/app/product-data";       
+import { NextRequest } from "next/server";
+import { connectToDb } from "../../db";    
 
-export async function GET( request: NextResponse, { params }: { params: { id: string } } ) {
-    const productId = params.id;
-    const product = products.find((p) => p.id === productId);
+export async function GET( request: NextRequest, { params }: { params: { id: string } } ) {
+    const { db } = await connectToDb();
+
+    const product = await db.collection("products").findOne({ id: params.id });
 
     if (!product) {
         return new Response("Product not found", { status: 404 });

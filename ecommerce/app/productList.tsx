@@ -1,8 +1,48 @@
+'use client';
+
 import Image from "next/image"
 import {Product} from "./product-data"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function ProductsList({products}: {products: Product[]}){
+export const dynamic = 'force-dynamic';
+
+export default function ProductsList({products, initialCartProducts}: {products: Product[], initialCartProducts: Product[]}){
+  
+  const [cartProducts, setCartProducts] = useState(initialCartProducts);
+  const router = useRouter();
+
+  async function addToCart(productId: string) {
+    const response = await fetch(process.env.NEXT_PUBLIC_SITE_URL + `/api/users/1/cart`,{
+      method: 'POST',
+      body: JSON.stringify({ productId }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const updatedCartProducts = await response.json();
+    setCartProducts(updatedCartProducts);
+    router.refresh();
+  }
+
+  function productIsInCart(productId: string) {
+    return cartProducts.some(product => product.id === productId);
+  }
+  
+  async function removeFromCart(productId: string) {
+    const response = await fetch(process.env.NEXT_PUBLIC_SITE_URL + `/api/users/1/cart/`, {
+      method: 'DELETE',
+      body: JSON.stringify({ productId }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const updatedCartProducts = await response.json();
+    setCartProducts(updatedCartProducts);
+    router.refresh();
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
       {products.map(product => (
@@ -21,6 +61,20 @@ export default function ProductsList({products}: {products: Product[]}){
           </div>
           <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
           <p className="text-gray-600">${product.price}</p>
+          {productIsInCart(product.id) 
+          ? (
+            <button onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removeFromCart(product.id);
+          }}>Remove from Cart</button>
+         ) : (
+          <button onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            addToCart(product.id);
+          }}>Add to Cart</button>
+          )}
         </Link>
       ))}
     </div>

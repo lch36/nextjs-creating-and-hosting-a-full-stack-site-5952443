@@ -1,8 +1,12 @@
 import NotFoundPage from "@/app/not-found";
-import {products} from "@/app/product-data";
+export const dynamic = 'force-dynamic';
+export default async function ProductDetailPage({params}: {params: {id: string}}) {
 
-export default function ProductDetailPage({params}: {params: {id: string}}) {
-    const product = products.find((p) => p.id === (params.id));
+    const productResponse = await fetch(process.env.NEXT_PUBLIC_SITE_URL + `/api/products/${params.id}`, { cache: 'no-store' })
+    if (!productResponse.ok) {
+        return <NotFoundPage />
+    }
+    const product = await productResponse.json();
 
     if(!product){
         return <NotFoundPage />
